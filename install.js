@@ -40,6 +40,7 @@ function fail(msg) { console.error(`[install] ✗ ${msg}`); process.exit(1) }
 step(`目标: ${DEST}`)
 if (!fs.existsSync(path.join(SRC, 'lib', 'index.js'))) fail('未找到 lib/index.js（请在插件源码目录运行本脚本）')
 fs.mkdirSync(DEST, { recursive: true })
+fs.mkdirSync(path.join(DEST, 'lib'), { recursive: true }) // 新环境必须显式创建 lib/（修复）
 for (const rel of ['lib/index.js', 'lib/adapter.js', 'lib/dsh-pkg.js', 'package.json', 'README.md']) {
   const from = path.join(SRC, rel)
   if (!fs.existsSync(from)) continue
