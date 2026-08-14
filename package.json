@@ -1,0 +1,36 @@
+{
+  "name": "@local/vision-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vision Bridge: text-based vision channel for text-only models on DeepSeek Harness (Windows) — native image attach, pre-injected descriptions, see_image tool over MiMo/GLM/Groq/Gemini",
+  "keywords": [
+    "deepseek-harness",
+    "vision",
+    "dsh-plugin",
+    "text-only-model",
+    "see-image"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/adapter.js",
+    "lib/dsh-pkg.js",
+    "install.js",
+    "vision-see.cjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/schema.test.js && node test/logic.test.js && node test/adapter.test.js",
+    "install:plugin": "node install.js",
+    "cli": "node vision-see.cjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.3"
+  }
+}

@@ -1,0 +1,17 @@
+# 依赖
+node_modules/
+
+# DSH 数据（绝不上传）
+*.credentials.yaml
+
+# 运行时产物
+.vb-curl-*.cfg
+.vb-cache-*
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
