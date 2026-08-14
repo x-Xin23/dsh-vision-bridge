@@ -17,6 +17,7 @@ vision-bridge/
 │   ├── adapter.js      # VisionDeepSeekAdapter (wraps the official adapter via the official extension point)
 │   └── dsh-pkg.js      # DSH package loader (package-name / DSH-home dual path resolution)
 ├── test/               # Unit tests: schema(7) + logic(15) + adapter(3)
+├── docs/               # cli / troubleshooting / security (bilingual)
 ├── vision-see.cjs      # Standalone CLI (analyzes files or chat attachments)
 ├── install.js          # One-command install (copy + patch + verify)
 ├── package.json        # v1.0.0, MIT
@@ -114,14 +115,21 @@ see_image ──► attachment_id / file_path → backend-table failover (unifie
 
 ## Standalone CLI (backup channel)
 
+`vision-see.cjs` is a standalone CLI channel: it runs without the plugin and analyzes local files or chat attachments directly.
+
 ```bash
-# analyze a local file
-node vision-see.cjs <image-path> [question] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
-# analyze a chat attachment directly (no subagent/plugin tool needed)
-node vision-see.cjs --attachment sha256:xxx... [question] [--backend ...] [--region ...]
+node vision-see.cjs <image-path|--attachment sha256:...> [question] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
 ```
-Thin shell; all pure logic reuses the plugin module exports (single source of truth). Honors `DSH_HOME` and `VB_PLUGIN_PATH`;
-`--attachment` reads from the DSH attachment store (`<DSH_HOME>/attachments/v1/objects/<first-2>/<full-hash>`, magic-byte MIME detection).
+
+Thin shell; all pure logic reuses the plugin module exports (single source of truth). Full usage: **[CLI Manual](docs/cli.en.md)** (arguments, examples, credentials, output, exit codes, caching).
+
+## Documentation
+
+| Doc | Read it when |
+|---|---|
+| [CLI Manual](docs/cli.en.md) | Full `vision-see.cjs` usage: arguments, examples, credentials, output, exit codes, caching |
+| [Troubleshooting](docs/troubleshooting.en.md) | Common symptoms and fixes (install / pasting / backends / cache / upgrades) |
+| [Security](docs/security.en.md) | Credential handling, network traffic, untrusted image content, data directory and risk list |
 
 ## Tests
 
@@ -143,6 +151,14 @@ Tests import the plugin source directly; groups that need `sharp` are skipped au
 
 - Cache files: `.vb-cache-*` (a few KB per image, two files per image)
 - **Auto cleanup**: on startup, keeps the most recent 500 cache files (`CACHE_KEEP_MAX`); older ones are deleted
+
+## Disclaimer
+
+- This project is provided **"AS-IS" under the MIT License**; the author makes no warranty and gives no endorsement for any particular use (commercial use included), and accepts no liability for any direct or indirect damages arising from its use.
+- Vision capability depends on **third-party upstream services**: Xiaomi MiMo, Zhipu GLM, Groq, Google Gemini (and any proxy you configure). Their use is governed by **each service's own terms, quotas, and data policies**, for which you are responsible.
+- **Image content (including text inside images) is sent to those third-party services**: do not use this project with sensitive images unless the target services and network path meet your compliance requirements.
+- Text inside images may contain malicious instructions (prompt injection): this project injects an untrusted-data marker as defense, but it is prompt-level protection, not hard isolation.
+- Maintained by an individual developer; no service-level agreement (SLA) of any kind is provided.
 
 ## License
 

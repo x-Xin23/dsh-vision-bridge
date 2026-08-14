@@ -20,6 +20,7 @@ vision-bridge/
 │   ├── adapter.js      # VisionDeepSeekAdapter（包装官方适配器，官方扩展点）
 │   └── dsh-pkg.js      # DSH 包加载器（包名/DSH home 双路径解析）
 ├── test/               # schema(7) + logic(15) + adapter(3) 单元测试
+├── docs/               # cli / troubleshooting / security（中英双语）
 ├── vision-see.cjs       # 独立 CLI（分析文件或贴图附件）
 ├── install.js          # 一键安装脚本（复制 + patch + 校验）
 ├── package.json        # v1.0.0，MIT
@@ -118,14 +119,21 @@ see_image ──► attachment_id / file_path → 后端表轮询（统一双协
 
 ## 独立 CLI（备用通道）
 
+`vision-see.cjs` 是独立命令行通道：不依赖插件运行，直接分析本地文件或会话贴图附件。
+
 ```bash
-# 分析本地文件
-node vision-see.cjs <图片路径> [问题] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
-# 直接分析会话贴图附件（主会话直达，无需子代理/插件工具）
-node vision-see.cjs --attachment sha256:xxx... [问题] [--backend ...] [--region ...]
+node vision-see.cjs <图片路径|--attachment sha256:...> [问题] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
 ```
-薄壳实现，纯逻辑复用插件模块导出，单一来源。支持 `DSH_HOME` 与 `VB_PLUGIN_PATH` 环境变量；
-`--attachment` 从 DSH 附件存储读取贴图（`<DSH_HOME>/attachments/v1/objects/<前2位>/<完整hash>`，魔数探测 MIME）。
+
+薄壳实现，纯逻辑复用插件模块导出，单一来源。完整用法见 **[独立 CLI 手册](docs/cli.md)**（参数、示例、环境变量、退出码、缓存）。
+
+## 文档
+
+| 文档 | 说明 |
+|---|---|
+| [独立 CLI 手册](docs/cli.md) | `vision-see.cjs` 完整用法：参数、示例、凭证、输出、退出码、缓存 |
+| [故障排查](docs/troubleshooting.md) | 常见症状与解决（安装 / 贴图 / 后端 / 缓存 / 升级） |
+| [安全说明](docs/security.md) | 凭证处理、网络传输、不可信图片内容、数据目录与风险清单 |
 
 ## 测试
 
@@ -147,6 +155,14 @@ node test/adapter.test.js  # 包装 Adapter 测试（3 项）
 
 - 缓存文件：`.vb-cache-*`（每图两个几 KB 文件）
 - **自动清理**：启动时保留最近 500 个缓存文件（`CACHE_KEEP_MAX`），更旧的自动删除
+
+## 免责声明
+
+- 本项目按 **MIT 许可证"按现状"（AS-IS）提供**，作者不对任何特定用途（包括商业用途）作任何担保或背书；因使用本项目产生的任何直接或间接损失，作者不承担责任
+- 本项目的视觉能力依赖**第三方上游服务**：小米 MiMo、智谱 GLM、Groq、Google Gemini（及用户自配的代理）。这些服务的使用受**各自服务条款、配额与数据政策的约束**，由使用者自行负责
+- **图片内容（含图中文字）会发送至上述第三方服务**：请勿对含敏感信息的图片使用本项目，除非你确认目标服务与网络路径符合你的合规要求
+- 图中文字可能包含恶意指令（prompt injection）：本项目虽注入不可信数据标记作为防护，但该防护为提示层面，非硬隔离
+- 本项目由个人开发者维护，不提供任何形式的服务等级承诺（SLA）
 
 ## License
 
