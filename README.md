@@ -2,6 +2,8 @@
 
 给 DeepSeek Harness（Windows）上的纯文本模型（如 deepseek-v4-flash）提供完整视觉能力。
 
+> **English**: [README.en.md](README.en.md)　|　简体中文（当前）
+
 **核心思路**：图片不进入模型输入（DeepSeek 适配器在代码层面拒绝图片块），而是——
 图片在会话里正常显示（UI 观感与原生视觉模型一致），模型上下文中收到的是
 **自动预注的描述文本 + 图片附件引用**，需要细节时用 `see_image` 工具按附件 ID 精查。
@@ -21,7 +23,7 @@ vision-bridge/
 ├── vision-see.cjs       # 独立 CLI（分析文件或贴图附件）
 ├── install.js          # 一键安装脚本（复制 + patch + 校验）
 ├── package.json        # v1.0.0，MIT
-└── README.md
+└── README.md / README.en.md（中文 / English）
 ```
 
 ## 快速开始（3 步）
