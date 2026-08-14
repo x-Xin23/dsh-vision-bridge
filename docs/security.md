@@ -9,6 +9,7 @@
 - 所有 API key 存放在 `%USERPROFILE%\.dsh\.credentials.yaml`（DSH 通用凭证文件），**明文**存储——请勿将文件提交到版本库、分享给他人
 - 插件与 CLI 发起 API 请求时，认证头写入**私有临时 config 文件**（`%USERPROFILE%\.dsh\vision-bridge\.vb-curl-*.cfg`，权限 0600），curl 通过 `-K` 引用，**认证头绝不进入进程参数**（避免被进程列表/任务管理器看到），用完即删
 - key 不出现在日志、缓存、工具结果或错误消息中
+- 自定义后端（`VB_API_KEY`，v1.2）与其他 key 同等保护：同样走 0600 临时 config 文件，不进进程参数
 - 本插件**不会读取或回传**其他无关的凭证字段
 
 ## 网络传输

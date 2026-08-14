@@ -29,7 +29,7 @@ node vision-see.cjs <image-path | --attachment sha256:...> [question] [options]
 | `<image-path>` | Local image file (png / jpg / jpeg / webp / gif / bmp; `data:image/...` text also accepted) |
 | `--attachment sha256:...` | Read a DSH chat attachment instead (content-addressed from the attachment store, magic-byte MIME detection) |
 | `[question]` | Optional natural-language question appended to the analysis prompt (e.g. `"What is the y-axis unit?"`) |
-| `--backend <name>` | Pin backend: `mimo` \| `glm` \| `groq` \| `gemini` \| `auto` (default `auto`, sequential failover) |
+| `--backend <name>` | Pin backend: `auto` \| `custom` \| `mimo` \| `glm` \| `groq` \| `gemini` (default `auto`: custom (VB_*) first → sequential failover; `custom` uses only the custom endpoint) |
 | `--region x,y,w,h` | Real crop region (normalized 0-1), e.g. `0.1,0.2,0.4,0.3`; fails loudly on invalid input |
 
 ### Environment variables
@@ -68,6 +68,13 @@ GLM_API_KEY: <Zhipu GLM-4.6V-Flash, free, direct>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b, free, requires proxy>
 GEMINI_API_KEY: <Gemini gemini-flash-latest, requires proxy>
 VISION_PROXY: http://127.0.0.1:7890   # only needed for Groq/Gemini
+
+# Optional: custom vision backend (used first when complete; --backend custom forces it)
+VB_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+VB_MODEL: qwen3-vl-plus
+VB_API_KEY: sk-xxx
+# VB_PROTOCOL: openai    # openai (default) | gemini
+# VB_NEEDS_PROXY: true
 ```
 
 Only `MIMO_API_KEY` is required; the rest are failover redundancy.

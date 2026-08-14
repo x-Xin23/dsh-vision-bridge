@@ -19,11 +19,11 @@ vision-bridge/
 │   ├── index.js        # 插件主文件（后端表 + 纯函数导出 + apply）
 │   ├── adapter.js      # VisionDeepSeekAdapter（包装官方适配器，官方扩展点）
 │   └── dsh-pkg.js      # DSH 包加载器（包名/DSH home 双路径解析）
-├── test/               # schema(7) + logic(15) + adapter(3) 单元测试
+├── test/               # schema(7) + logic(17) + adapter(3) 单元测试
 ├── docs/               # cli / troubleshooting / security（中英双语）
 ├── vision-see.cjs       # 独立 CLI（分析文件或贴图附件）
 ├── install.js          # 一键安装脚本（复制 + patch + 校验）
-├── package.json        # v1.0.0，MIT
+├── package.json        # v1.2.0，MIT
 └── README.md / README.en.md（中文 / English）
 ```
 
@@ -39,16 +39,25 @@ node install.js headless   # 或指定 profile
 **2. 配置 API key**（编辑 `%USERPROFILE%\.dsh\.credentials.yaml`）：
 
 ```yaml
+# 内置后端（最少只需 MIMO_API_KEY 一个即可使用，其余为兜底冗余）
 MIMO_API_KEY: <小米 MiMo-V2.5，主后端，直连，¥1/MTok>
 GLM_API_KEY: <智谱 GLM-4.6V-Flash，免费直连>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b，免费，需代理>
 GEMINI_API_KEY: <Gemini gemini-flash-latest，需代理>
 VISION_PROXY: http://127.0.0.1:7890   # 仅 Groq/Gemini 需要（国内网络）
+
+# 可选：自定义视觉后端（v1.2）——填了就走自定义优先、内置兜底
+VB_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions  # 任意 OpenAI 兼容端点
+VB_MODEL: qwen3-vl-plus
+VB_API_KEY: sk-xxx
+# VB_PROTOCOL: openai      # openai（默认）| gemini
+# VB_NEEDS_PROXY: true     # true 时走 VISION_PROXY
 ```
 
 **3. 重启 DSH**。启动日志出现 `[vision-bridge] 原生图片通道挂接完成` 即生效。
 
 > 最少只需 `MIMO_API_KEY` 一个 key 即可使用（其余为兜底冗余）。
+> 自定义后端（`VB_*`）配置完整后，视觉请求**优先走你的端点**，内置四家仅作兜底。
 
 ## 能力
 
@@ -59,6 +68,8 @@ VISION_PROXY: http://127.0.0.1:7890   # 仅 Groq/Gemini 需要（国内网络）
 | `see_image` 工具 | 按需精查：OCR / 布局 / 定向问题 / 区域聚焦（真实裁剪）；支持 `attachment_id` 或 `file_path` |
 | region 真实裁剪 | 归一化坐标 → sharp 裁剪放大到 1280px；失败即报错，不静默整图 |
 | 四后端轮询 | MiMo（主）→ GLM → Groq → Gemini，失败自动降级 |
+| 自定义视觉后端 | 可选 `VB_BASE_URL` / `VB_MODEL` / `VB_API_KEY` / `VB_PROTOCOL` / `VB_NEEDS_PROXY`——任意 OpenAI 兼容（或 Gemini 协议）视觉模型直接接入，**自定义优先、内置四家兜底** |
+| 多路由自动发现 | deepseek-official 替换式无感增强；家族内其他文本路由（glm 等）自动注册 "(vision)" 变体——换主模型后视觉能力自动跟随 |
 | 限流重试 | 限流类错误自动等待 2s/4s 重试（最多 3 次） |
 | 结果缓存 | 图片hash + (问题⊕区域⊕后端⊕版本)hash——后端/版本变化自动失效 |
 | 附件单一存储 | 不保存图片副本——字节内存缓存 + DSH `attachments.readImage`（内容寻址、校验摘要）重启可恢复 |
@@ -117,12 +128,20 @@ see_image ──► attachment_id / file_path → 后端表轮询（统一双协
 - 安装时自动在 `cordis.patch.yml` 写入 `llm-deepseek: disabled`（禁用原适配器，避免路由冲突）
 - `see_image` 工具始终可用
 
+**v1.2 扩展（适配度）**：
+- **A 自定义视觉后端**：`VB_BASE_URL`/`VB_MODEL`/`VB_API_KEY` 等配置后，尝试链变为
+  自定义 → MiMo → GLM → Groq → Gemini；缓存键含自定义端点 hash（换端点自动失效）
+- **B 多路由自动发现**：deepseek-official 保持替换式（无感）；家族内其他文本路由
+  （glm 等，`SCOPE_FAMILIES`）自动注册 `vb-vision-<id>` 包装路由——模型选择器出现
+  "(vision)" 变体，图片转描述后委托原路由；`llm/adapters-updated` 事件触发重扫，
+  延迟挂载的路由也会被覆盖；原生视觉模型自动跳过
+
 ## 独立 CLI（备用通道）
 
 `vision-see.cjs` 是独立命令行通道：不依赖插件运行，直接分析本地文件或会话贴图附件。
 
 ```bash
-node vision-see.cjs <图片路径|--attachment sha256:...> [问题] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
+node vision-see.cjs <图片路径|--attachment sha256:...> [问题] [--backend auto|custom|mimo|glm|groq|gemini] [--region x,y,w,h]
 ```
 
 薄壳实现，纯逻辑复用插件模块导出，单一来源。完整用法见 **[独立 CLI 手册](docs/cli.md)**（参数、示例、环境变量、退出码、缓存）。
@@ -139,7 +158,7 @@ node vision-see.cjs <图片路径|--attachment sha256:...> [问题] [--backend m
 
 ```bash
 node test/schema.test.js   # schema 校验（dsh 真实校验器，7 项）
-node test/logic.test.js    # 逻辑单元测试（15 项，含回归断言）
+node test/logic.test.js    # 逻辑单元测试（17 项，含回归断言）
 node test/adapter.test.js  # 包装 Adapter 测试（3 项）
 ```
 测试直接 import 插件源码；sharp 不可用时自动跳过依赖它的测试组。
@@ -147,6 +166,8 @@ node test/adapter.test.js  # 包装 Adapter 测试（3 项）
 ## 已知限制
 
 - 包装 Adapter 继承官方 `DeepSeekAdapter`——DSH 升级时类签名变化可能破坏（TS 契约级，显式暴露，不会静默失效）；启动自检会告警
+- 路由自动发现基于 provider 注册拓扑（`llm/adapters-updated` 重扫）——延迟挂载的路由在下次拓扑变化时才会出现 "(vision)" 变体
+- 自定义后端（VB_*）走 OpenAI 兼容或 Gemini 协议；其他协议（Anthropic 等）暂不支持
 - 预注描述注入预算按上下文动态分档（≥64K→1600 / ≥16K→800 / 更小→400）；更细需求用 `see_image`
 - 预注与 `see_image` 缓存独立（内容要求不同）；**see_image 整图分析会回填预注缓存**——预注失败的图精查一次后自愈
 - Groq/Gemini 国内直连不通，需配置 `VISION_PROXY`

@@ -32,7 +32,7 @@ node vision-see.cjs <图片路径 | --attachment sha256:...> [问题] [选项]
 | `<图片路径>` | 本地图片文件（png / jpg / jpeg / webp / gif / bmp；也支持 `data:image/...` 文本） |
 | `--attachment sha256:...` | 改为读取 DSH 会话贴图附件（从附件存储按内容寻址读取，魔数探测格式） |
 | `[问题]` | 可选的自然语言问题，附加到分析 prompt（如 `"图表纵轴是什么？"`） |
-| `--backend <name>` | 指定后端：`mimo` \| `glm` \| `groq` \| `gemini` \| `auto`（默认 `auto`，按序 failover） |
+| `--backend <name>` | 指定后端：`auto` \| `custom` \| `mimo` \| `glm` \| `groq` \| `gemini`（默认 `auto`：自定义(VB_*)优先 → 按序 failover；`custom` 只用自定义端点） |
 | `--region x,y,w,h` | 真实裁剪区域（归一化坐标 0-1），例如 `0.1,0.2,0.4,0.3`；失败即报错 |
 
 ### 环境变量
@@ -71,6 +71,13 @@ GLM_API_KEY: <智谱 GLM-4.6V-Flash，免费直连>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b，免费，需代理>
 GEMINI_API_KEY: <Gemini gemini-flash-latest，需代理>
 VISION_PROXY: http://127.0.0.1:7890   # 仅 Groq/Gemini 需要
+
+# 可选：自定义视觉后端（配齐后优先使用；--backend custom 强制只用它）
+VB_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+VB_MODEL: qwen3-vl-plus
+VB_API_KEY: sk-xxx
+# VB_PROTOCOL: openai    # openai（默认）| gemini
+# VB_NEEDS_PROXY: true
 ```
 
 最少只需 `MIMO_API_KEY` 一个即可运行；其余为 failover 兜底。

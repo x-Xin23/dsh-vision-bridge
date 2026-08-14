@@ -9,6 +9,7 @@ This page explains how Vision Bridge handles credentials, network traffic, image
 - All API keys live in `%USERPROFILE%\.dsh\.credentials.yaml` (DSH's shared credentials file), stored **in plaintext** — never commit it to version control or share it
 - When the plugin or CLI makes API requests, auth headers are written to a **private temporary config file** (`%USERPROFILE%\.dsh\vision-bridge\.vb-curl-*.cfg`, mode 0600), which curl consumes via `-K` — **auth headers never appear in process arguments** (invisible to process listings/task managers), and the file is deleted after use
 - Keys never appear in logs, caches, tool results, or error messages
+- The custom backend (`VB_API_KEY`, v1.2) gets the same protection as every other key: 0600 temp config file, never in process arguments
 - The plugin does **not** read or forward other unrelated credential fields
 
 ## Network traffic

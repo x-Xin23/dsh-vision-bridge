@@ -33,6 +33,8 @@ Look up your symptom below. Suggested order: **install → startup log → pasti
 | Frequent rate-limit retries (`限流，2000ms 后重试`) | A burst of image reads hit backend quota: wait and retry; `see_image` hits the cache for the same image+question, avoiding repeat calls |
 | curl timeout (`curl 超时`) | Unstable network or slow proxy: check proxy connectivity and retry; 150s is the per-request cap |
 | A backend reports 401 / 403 | Invalid or expired key: replace it; confirm the key matches its backend (a MiMo key cannot go into the GLM field) |
+| Custom backend (VB_*) always fails | Verify `VB_BASE_URL` is a full chat/completions endpoint (OpenAI-compatible) or a Gemini endpoint; `VB_MODEL` is a vision model the service actually serves; `VB_PROTOCOL` matches the endpoint; set `VB_NEEDS_PROXY: true` when a proxy is required. On custom failure the chain falls back to the four built-ins automatically |
+| Changed VB_* but results did not change | Cache keys include a custom-endpoint hash — switching endpoints/models invalidates automatically; if a CLI cache lingers, delete the matching `.vb-see.cache.json` |
 
 ## Cache / Data
 

@@ -33,6 +33,8 @@
 | 频繁出现限流重试（`限流，2000ms 后重试`） | 短时间大量看图触发了后端配额：稍等再试；`see_image` 对同图同问会命中缓存，避免重复调用 |
 | curl 超时（`curl 超时`） | 网络不稳或代理慢：检查代理连通性后重试；150s 为单次请求上限 |
 | 某后端报 401 / 403 | key 无效或过期：换 key；确认 key 与后端对应（MiMo key 不能填到 GLM 字段） |
+| 自定义后端（VB_*）总是失败 | 确认 `VB_BASE_URL` 是完整的 chat/completions 端点（OpenAI 兼容）或 Gemini 端点；`VB_MODEL` 是该服务实际可用的视觉模型名；`VB_PROTOCOL` 与端点协议一致；需代理时设 `VB_NEEDS_PROXY: true`。日志中 custom 失败后会自动回退内置四家 |
+| 改了 VB_* 但结果没变 | 缓存键含自定义端点 hash——改了端点/模型应自动失效；若 CLI 缓存未失效，删除对应 `.vb-see.cache.json` |
 
 ## 缓存 / 数据
 

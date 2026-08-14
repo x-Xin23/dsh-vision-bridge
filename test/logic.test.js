@@ -20,7 +20,11 @@ const {
   HOOKS,
   PROMPT_VERSION,
   PREPROCESS_VERSION,
+  SCOPE_PROVIDER,
+  SCOPE_FAMILIES,
+  VISION_WRAP_PREFIX,
   attachmentObjectPath,
+  backendTriesFor,
   buildBackendRequest,
   buildDescribePrompt,
   buildPrompt,
@@ -28,6 +32,8 @@ const {
   collectImageAttachmentIds,
   convertImagesSync,
   cropRegionImage,
+  customBackendFromKeys,
+  customHashFor,
   describeInjectMaxFor,
   extractResponseText,
   imageBlockToText,
@@ -36,6 +42,8 @@ const {
   mimeFromBytes,
   parseDataUrlText,
   preprocessImage,
+  providerInScope,
+  shouldWrapModelInfo,
 } = await import(new URL('../lib/index.js', import.meta.url).href)
 
 let passed = 0
@@ -317,6 +325,86 @@ if (sharp) {
   assert.equal(mimeFromBytes(gif), 'image/gif')
   assert.equal(mimeFromBytes(Buffer.from('text')), undefined)
   ok('11. attachmentObjectPath 分片 / mimeFromBytes 魔数探测')
+}
+
+// ---------- 13. 自定义视觉后端（v1.2，A） ----------
+{
+  // customBackendFromKeys：完整配置 → 对象；缺键 → null
+  const full = customBackendFromKeys({
+    VB_BASE_URL: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    VB_MODEL: 'qwen3-vl-plus',
+    VB_API_KEY: 'sk-test',
+  })
+  assert.ok(full, '完整 VB_* 应构建 custom 配置')
+  assert.equal(full.name, 'custom')
+  assert.equal(full.protocol, 'openai')
+  assert.equal(full.model, 'qwen3-vl-plus')
+  assert.equal(full.needsProxy, false)
+  assert.equal(customBackendFromKeys({}), null)
+  assert.equal(customBackendFromKeys({ VB_MODEL: 'x' }), null, '缺 URL 应拒绝')
+  assert.equal(customBackendFromKeys({ VB_BASE_URL: 'u', VB_MODEL: 'm' }), null, '缺 key 应拒绝')
+  assert.equal(customBackendFromKeys({ VB_BASE_URL: 'u', VB_MODEL: 'm', VB_API_KEY: 'k', VB_PROTOCOL: 'gemini', VB_NEEDS_PROXY: 'true' }).protocol, 'gemini')
+  assert.equal(customBackendFromKeys({ VB_BASE_URL: 'u', VB_MODEL: 'm', VB_API_KEY: 'k', VB_PROTOCOL: 'gemini', VB_NEEDS_PROXY: 'true' }).needsProxy, true)
+
+  // customHashFor：配置变化 → hash 变化；空 → ''
+  const h1 = customHashFor(customBackendFromKeys({ VB_BASE_URL: 'u1', VB_MODEL: 'm1', VB_API_KEY: 'k' }))
+  const h2 = customHashFor(customBackendFromKeys({ VB_BASE_URL: 'u2', VB_MODEL: 'm1', VB_API_KEY: 'k' }))
+  assert.ok(h1 && h1.length > 0)
+  assert.notEqual(h1, h2, '端点变化必须改变 customHash')
+  assert.equal(customHashFor(null), '')
+
+  // backendTriesFor：custom 在链头；'custom' 强制；内置兜底不变
+  const keys = { VB_BASE_URL: 'https://x/v1', VB_MODEL: 'm', VB_API_KEY: 'k', MIMO_API_KEY: 'mk', GLM_API_KEY: 'gk' }
+  const chain = backendTriesFor('auto', keys, undefined)
+  assert.equal(chain[0].name, 'custom', 'custom 应位于尝试链最前')
+  assert.equal(chain[0].cfg.model, 'm')
+  assert.ok(chain.some((t) => t.name === 'mimo'), '内置后端仍参与兜底')
+  const only = backendTriesFor('custom', keys, undefined)
+  assert.equal(only.length, 1)
+  assert.equal(only[0].name, 'custom', "指定 'custom' 时只用自定义")
+  assert.equal(backendTriesFor('custom', { MIMO_API_KEY: 'mk' }, undefined).length, 0, '未配置 VB_* 时 custom 不可用')
+  assert.equal(backendTriesFor('auto', { MIMO_API_KEY: 'mk' }, undefined)[0].name, 'mimo', '无 custom 配置时链头为内置')
+
+  // buildBackendRequest：cfgOverride 生效（OpenAI 协议）
+  const cfg = customBackendFromKeys({ VB_BASE_URL: 'https://x/v1/chat/completions', VB_MODEL: 'qwen', VB_API_KEY: 'k' })
+  const req = buildBackendRequest('custom', 'b64', 'image/png', 'prompt', 'sk-1', cfg)
+  assert.equal(req.url, 'https://x/v1/chat/completions')
+  const body = JSON.parse(req.bodyJson)
+  assert.equal(body.model, 'qwen')
+  assert.equal(req.headers.Authorization, 'Bearer sk-1')
+
+  // cacheKeyFor：customHash 维度（同图同问，端点不同 → 键不同）
+  const img = Buffer.from('custom-cache-test')
+  const kNoCustom = cacheKeyFor(img, 'q', undefined, 'auto')
+  const kCustom1 = cacheKeyFor(img, 'q', undefined, 'auto', h1)
+  const kCustom2 = cacheKeyFor(img, 'q', undefined, 'auto', h2)
+  assert.notEqual(kCustom1.askHash, kNoCustom.askHash, '有/无自定义端点必须区分')
+  assert.notEqual(kCustom1.askHash, kCustom2.askHash, '自定义端点不同必须区分')
+  assert.equal(kNoCustom.askHash, cacheKeyFor(img, 'q', undefined, 'auto', '').askHash, '空 customHash 与不传一致')
+
+  ok('13. 自定义后端：VB_* 构建 / hash / 链头 / 请求构建 / 缓存键')
+}
+
+// ---------- 14. 多路由自动发现（v1.2，B） ----------
+{
+  assert.ok(SCOPE_FAMILIES.includes('deepseek') && SCOPE_FAMILIES.includes('glm'), '家族应含 deepseek/glm')
+  // shouldWrapModelInfo：文本模型包装；视觉模型/已声明 image 排除
+  assert.equal(shouldWrapModelInfo({ id: 'deepseek-v4-flash', inputModalities: ['text'] }), true)
+  assert.equal(shouldWrapModelInfo({ id: 'glm-4.6', inputModalities: ['text'] }), true)
+  assert.equal(shouldWrapModelInfo({ id: 'deepseek-vl', inputModalities: ['text'] }), false, 'deepseek-vl 原生视觉排除')
+  assert.equal(shouldWrapModelInfo({ id: 'glm-4.6v', inputModalities: ['text'] }), false, 'glm-*-v 原生视觉排除')
+  assert.equal(shouldWrapModelInfo({ id: 'janus-pro', inputModalities: ['text'] }), false)
+  assert.equal(shouldWrapModelInfo({ id: 'deepseek-chat', inputModalities: ['text', 'image'] }), false, '已声明 image 输入排除')
+  assert.equal(shouldWrapModelInfo(null), false)
+  assert.equal(shouldWrapModelInfo({}), false)
+  // providerInScope：家族内非主路由；主路由/家族外排除
+  assert.equal(providerInScope('deepseek-official'), false, '替换式主路由不走变体')
+  assert.equal(providerInScope('glm-official'), true)
+  assert.equal(providerInScope('deepseek-local'), true)
+  assert.equal(providerInScope('opencode-go'), false, '家族外排除')
+  assert.equal(providerInScope(''), false)
+  assert.ok(VISION_WRAP_PREFIX === 'vb-vision-')
+  ok('14. 路由发现：模型过滤（视觉排除）/ provider 范围（家族内非主路由）')
 }
 
 console.log(`\nALL PASS: ${passed} 项逻辑测试全部通过`)

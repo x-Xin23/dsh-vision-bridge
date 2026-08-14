@@ -1,8 +1,8 @@
 {
   "name": "@local/vision-bridge",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
-  "description": "Vision Bridge: text-based vision channel for text-only models on DeepSeek Harness (Windows) — native image attach, pre-injected descriptions, see_image tool over MiMo/GLM/Groq/Gemini",
+  "description": "Vision Bridge: text-based vision channel for text-only models on DeepSeek Harness (Windows) — native image attach, pre-injected descriptions, see_image tool, custom backend support (VB_*), auto-discovered vision routes",
   "keywords": [
     "deepseek-harness",
     "vision",

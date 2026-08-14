@@ -3,7 +3,7 @@
  * vision-see.js — Vision Bridge 的独立 CLI 通道
  *
  * 用法:
- *   node vision-see.js <图片路径> [问题] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]
+ *   node vision-see.js <图片路径> [问题] [--backend auto|custom|mimo|glm|groq|gemini] [--region x,y,w,h]
  *
  * 复用 @local/vision-bridge 导出的纯逻辑（后端表 / prompt / 缓存键 / 预处理），
  * 本文件只保留 CLI 壳、凭证读取与 curl 传输，避免双份维护。
@@ -35,6 +35,8 @@ const {
   buildPrompt,
   cacheKeyFor,
   cropRegionImage,
+  customBackendFromKeys,
+  customHashFor,
   extractResponseText,
   isRateLimitError,
   mimeForPath,
@@ -148,7 +150,7 @@ async function main() {
   imgPath = positional[0]
   if (positional.length > 1) question = positional.slice(1).join(' ')
   if (!imgPath && !attachmentId) {
-    console.error('用法: node vision-see.js <图片路径|--attachment sha256:...> [问题] [--backend mimo|glm|groq|gemini|auto] [--region x,y,w,h]')
+    console.error('用法: node vision-see.js <图片路径|--attachment sha256:...> [问题] [--backend auto|custom|mimo|glm|groq|gemini] [--region x,y,w,h]')
     process.exit(2)
   }
 
@@ -171,8 +173,8 @@ async function main() {
   const proxy = creds.VISION_PROXY
   const tries = backendTriesFor(backend, creds, proxy)
   if (tries.length === 0) {
-    const names = backend && backend !== 'auto' ? [backend] : BACKEND_ORDER
-    const wanted = names.map((n) => BACKENDS[n].keyNames.join(' / ')).join(' 或 ')
+    const names = backend && backend !== 'auto' ? [backend] : BACKEND_ORDER.concat('custom')
+    const wanted = names.map((n) => BACKENDS[n] ? BACKENDS[n].keyNames.join(' / ') : 'VB_API_KEY+VB_BASE_URL+VB_MODEL').join(' 或 ')
     throw new Error('未找到 ' + wanted + ' 凭证（检查 ' + path.join(os.homedir(), '.dsh', '.credentials.yaml') + '）')
   }
 
@@ -208,8 +210,8 @@ async function main() {
     }
   }
 
-  // ---- 结果缓存（同图同问同区域同后端同版本直接命中，不重复调用 API） ----
-  const { imageHash, askHash } = cacheKeyFor(raw, question, region, backend)
+  // ---- 结果缓存（同图同问同区域同后端同版本同自定义端点直接命中，不重复调用 API） ----
+  const { imageHash, askHash } = cacheKeyFor(raw, question, region, backend, customHashFor(customBackendFromKeys(creds)))
   const cacheFile = (isAttachment
     ? path.join(DSH_HOME, 'vision-bridge', '.att-' + String(attachmentId).replace(/[^a-z0-9]/gi, '_'))
     : imgPath) + '.vb-see.cache.json'
