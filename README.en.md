@@ -8,6 +8,14 @@ Full vision capability for text-only models (e.g. `deepseek-v4-flash`) on DeepSe
 
 **Design principle — zero UI intrusion**: this plugin **registers no browser panels, Settings sections, or tool cards** — the DSH web UI stays completely untouched. The entire configuration surface is a single file (`.credentials.yaml`), and installation only writes two lines into `cordis.patch.yml` (mount + disable the original adapter). That buys: no UI-breakage risk on DSH upgrades, minimal compatibility surface with DSH versions, and the lowest mental load for users — paste and go, no settings page to explore. The honest cost: there is no visual configuration page yet; changing configuration (e.g. the custom backend `VB_*`) means editing the yaml file.
 
+**Implementation — a wrapper around the official adapter**: built by extending DeepSeek's official `DeepSeekAdapter` and registered through the **official extension point** `ctx.llm.registerAdapter` — **no monkey-patching of internal methods**. Three pieces work together for "invisible pre-injection":
+
+1. `resolveModel` declares image input on text-only models (passes DSH admission checks, so pasted images enter the session)
+2. The `saveImage` hook translates every image into a description in the background (multi-backend failover + caching + rate-limit retry)
+3. `stream` swaps image blocks for the generated description before forwarding the request (waits for in-flight descriptions, bounded 8s), then delegates to the official implementation
+
+The wire protocol (SSE framing, serialization, retry policy) is fully inherited from the official class — a DSH upgrade breaks at the class signature (a TS contract), the startup self-check warns, **never silently**.
+
 > 中文文档：[README.md](README.md)
 
 ## Quick Start (3 steps)
