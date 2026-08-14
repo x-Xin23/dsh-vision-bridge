@@ -6,6 +6,8 @@ Full vision capability for text-only models (e.g. `deepseek-v4-flash`) on DeepSe
 
 **Scope**: only rewrites image requests on the `deepseek-official` (text-only) route. Any other provider (including native vision models) passes through untouched.
 
+**Design principle — zero UI intrusion**: this plugin **registers no browser panels, Settings sections, or tool cards** — the DSH web UI stays completely untouched. The entire configuration surface is a single file (`.credentials.yaml`), and installation only writes two lines into `cordis.patch.yml` (mount + disable the original adapter). That buys: no UI-breakage risk on DSH upgrades, minimal compatibility surface with DSH versions, and the lowest mental load for users — paste and go, no settings page to explore. The honest cost: there is no visual configuration page yet; changing configuration (e.g. the custom backend `VB_*`) means editing the yaml file.
+
 > 中文文档：[README.md](README.md)
 
 ## Repository Layout
