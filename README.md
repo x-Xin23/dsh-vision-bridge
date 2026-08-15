@@ -58,14 +58,14 @@ VB_API_KEY: sk-xxx
 
 **3. 重启 DSH**。启动日志出现 `[vision-bridge] 原生图片通道挂接完成` 即生效。
 
-### 获取 API key（对应上面各字段）
+### 获取 API key（对应上面各字段，点击直达创建页）
 
 | 后端 | 获取地址 | 说明 |
 |---|---|---|
-| MiMo（主） | [mimo.mi.com](https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call) | 小米 MiMo 开放平台，注册/登录后创建 API key，有免费额度 |
-| GLM | [open.bigmodel.cn](https://open.bigmodel.cn/) | 智谱 AI 开放平台，注册即送免费额度（GLM-4.6V-Flash 免费） |
-| Groq | [console.groq.com](https://console.groq.com/) | 免费注册，需代理访问 |
-| Gemini | [aistudio.google.com](https://aistudio.google.com/) | Google AI Studio，免费 key（3 分钟），需代理访问 |
+| MiMo（主） | [platform.xiaomimimo.com/#/console/api-keys](https://platform.xiaomimimo.com/#/console/api-keys) | 小米账号登录，API Keys 页直接创建，有免费额度 |
+| GLM | [bigmodel.cn/usercenter/proj-mgmt/apikeys](https://bigmodel.cn/usercenter/proj-mgmt/apikeys) | 智谱 API Keys 页，注册即送免费额度（GLM-4.6V-Flash 免费） |
+| Groq | [console.groq.com/keys](https://console.groq.com/keys) | 免费注册，需代理访问 |
+| Gemini | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | Google AI Studio 的 API key 页，免费（3 分钟），需代理访问 |
 | VISION_PROXY | 自备 | 国内网络访问 Groq/Gemini 用的代理地址（如 Clash 的 `http://127.0.0.1:7890`） |
 | 自定义端点 | 你自己的服务控制台 | 如阿里云百炼、OpenRouter、自建 vLLM/Ollama 的 API key |
 
