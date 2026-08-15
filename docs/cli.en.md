@@ -80,6 +80,12 @@ VB_API_KEY: sk-xxx
 Only `MIMO_API_KEY` is required; the rest are failover redundancy.
 Missing credentials produce: `未找到 <keyNames> 凭证（检查 .../.credentials.yaml）`.
 
+**Where to get keys**: MiMo → [mimo.mi.com](https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call) ｜
+GLM → [open.bigmodel.cn](https://open.bigmodel.cn/) ｜
+Groq → [console.groq.com](https://console.groq.com/) (proxy required) ｜
+Gemini → [aistudio.google.com](https://aistudio.google.com/) (proxy required) ｜
+Custom endpoint → your own service console.
+
 ## Output format
 
 On success, two lines:

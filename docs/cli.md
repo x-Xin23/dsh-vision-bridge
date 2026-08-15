@@ -83,6 +83,12 @@ VB_API_KEY: sk-xxx
 最少只需 `MIMO_API_KEY` 一个即可运行；其余为 failover 兜底。
 缺凭证时报错：`未找到 <keyNames> 凭证（检查 .../.credentials.yaml）`。
 
+**获取地址**：MiMo → [mimo.mi.com](https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call) ｜
+GLM → [open.bigmodel.cn](https://open.bigmodel.cn/) ｜
+Groq → [console.groq.com](https://console.groq.com/)（需代理）｜
+Gemini → [aistudio.google.com](https://aistudio.google.com/)（需代理）｜
+自定义端点 → 你自己的服务控制台。
+
 ## 输出格式
 
 成功时两行：

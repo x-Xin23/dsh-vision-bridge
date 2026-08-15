@@ -58,6 +58,20 @@ VB_API_KEY: sk-xxx
 
 **3. 重启 DSH**。启动日志出现 `[vision-bridge] 原生图片通道挂接完成` 即生效。
 
+### 获取 API key（对应上面各字段）
+
+| 后端 | 获取地址 | 说明 |
+|---|---|---|
+| MiMo（主） | [mimo.mi.com](https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call) | 小米 MiMo 开放平台，注册/登录后创建 API key，有免费额度 |
+| GLM | [open.bigmodel.cn](https://open.bigmodel.cn/) | 智谱 AI 开放平台，注册即送免费额度（GLM-4.6V-Flash 免费） |
+| Groq | [console.groq.com](https://console.groq.com/) | 免费注册，需代理访问 |
+| Gemini | [aistudio.google.com](https://aistudio.google.com/) | Google AI Studio，免费 key（3 分钟），需代理访问 |
+| VISION_PROXY | 自备 | 国内网络访问 Groq/Gemini 用的代理地址（如 Clash 的 `http://127.0.0.1:7890`） |
+| 自定义端点 | 你自己的服务控制台 | 如阿里云百炼、OpenRouter、自建 vLLM/Ollama 的 API key |
+
+> 最少只需 `MIMO_API_KEY` 一个 key 即可使用（其余为兜底冗余）。
+> 自定义后端（`VB_*`）配置完整后，视觉请求**优先走你的端点**，内置四家仅作兜底。
+
 ## 能力
 
 | 能力 | 说明 |

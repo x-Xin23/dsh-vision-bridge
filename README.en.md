@@ -47,6 +47,20 @@ VB_API_KEY: sk-xxx
 
 **3. Restart DSH**. You are up once the startup log shows `[vision-bridge] native image channel ready`.
 
+### Where to get API keys (for the fields above)
+
+| Backend | Where to get it | Notes |
+|---|---|---|
+| MiMo (primary) | [mimo.mi.com](https://mimo.mi.com/docs/zh-CN/quick-start/summary/first-api-call) | Xiaomi MiMo open platform — sign up/log in, create an API key, free quota available |
+| GLM | [open.bigmodel.cn](https://open.bigmodel.cn/) | Zhipu AI open platform — free quota on signup (GLM-4.6V-Flash is free) |
+| Groq | [console.groq.com](https://console.groq.com/) | Free signup, proxy required |
+| Gemini | [aistudio.google.com](https://aistudio.google.com/) | Google AI Studio — free key in ~3 minutes, proxy required |
+| VISION_PROXY | your own | Proxy address for reaching Groq/Gemini from mainland-China networks (e.g. Clash's `http://127.0.0.1:7890`) |
+| Custom endpoint | your own service console | e.g. Alibaba DashScope, OpenRouter, self-hosted vLLM/Ollama API key |
+
+> Only `MIMO_API_KEY` is required to use the plugin; the rest are fallback redundancy.
+> With a complete `VB_*` config, vision requests **prefer your endpoint**; the four built-ins are fallback only.
+
 ## Features
 
 | Feature | Description |
