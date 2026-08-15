@@ -67,6 +67,7 @@ MIMO_API_KEY: <Xiaomi MiMo-V2.5, primary backend, direct>
 GLM_API_KEY: <Zhipu GLM-4.6V-Flash, free, direct>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b, free, requires proxy>
 GEMINI_API_KEY: <Gemini gemini-flash-latest, requires proxy>
+# Your local proxy's listen address (use YOUR proxy's actual port; Clash=7890 / v2rayN=10809 / SS=1080)
 VISION_PROXY: http://127.0.0.1:7890   # only needed for Groq/Gemini
 
 # Optional: custom vision backend (used first when complete; --backend custom forces it)

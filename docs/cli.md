@@ -70,6 +70,7 @@ MIMO_API_KEY: <小米 MiMo-V2.5，主后端，直连>
 GLM_API_KEY: <智谱 GLM-4.6V-Flash，免费直连>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b，免费，需代理>
 GEMINI_API_KEY: <Gemini gemini-flash-latest，需代理>
+# 本机代理监听地址（以你自己代理软件的端口为准；Clash=7890 / v2rayN=10809 / SS=1080）
 VISION_PROXY: http://127.0.0.1:7890   # 仅 Groq/Gemini 需要
 
 # 可选：自定义视觉后端（配齐后优先使用；--backend custom 强制只用它）

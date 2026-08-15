@@ -35,6 +35,10 @@ MIMO_API_KEY: <Xiaomi MiMo-V2.5, primary backend, direct, ¥1/MTok>
 GLM_API_KEY: <Zhipu GLM-4.6V-Flash, free, direct>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b, free, requires proxy>
 GEMINI_API_KEY: <Gemini gemini-flash-latest, requires proxy>
+# Your local proxy's listen address (check YOUR proxy software's port — don't copy 7890 blindly!)
+#   Clash/Clash Verge → http://127.0.0.1:7890
+#   v2rayN           → http://127.0.0.1:10809
+#   Shadowsocks      → http://127.0.0.1:1080
 VISION_PROXY: http://127.0.0.1:7890   # only needed for Groq/Gemini (mainland-China networks)
 
 # Optional: custom vision backend — when set, custom goes first, built-ins back it up
@@ -55,7 +59,7 @@ VB_API_KEY: sk-xxx
 | GLM | [bigmodel.cn/usercenter/proj-mgmt/apikeys](https://bigmodel.cn/usercenter/proj-mgmt/apikeys) | Zhipu API Keys page — free quota on signup (GLM-4.6V-Flash is free) |
 | Groq | [console.groq.com/keys](https://console.groq.com/keys) | Free signup, proxy required |
 | Gemini | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | Google AI Studio API key page — free in ~3 minutes, proxy required |
-| VISION_PROXY | your own | Proxy address for reaching Groq/Gemini from mainland-China networks (e.g. Clash's `http://127.0.0.1:7890`) |
+| VISION_PROXY | your own (local proxy) | Fill in **your proxy software's listen address**: Clash → `127.0.0.1:7890`; v2rayN → `127.0.0.1:10809`; Shadowsocks → `127.0.0.1:1080`. Use the actual port shown in your proxy's settings |
 | Custom endpoint | your own service console | e.g. Alibaba DashScope, OpenRouter, self-hosted vLLM/Ollama API key |
 
 > Only `MIMO_API_KEY` is required to use the plugin; the rest are fallback redundancy.

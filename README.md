@@ -46,6 +46,10 @@ MIMO_API_KEY: <小米 MiMo-V2.5，主后端，直连，¥1/MTok>
 GLM_API_KEY: <智谱 GLM-4.6V-Flash，免费直连>
 GROQ_API_KEY: <Groq qwen/qwen3.6-27b，免费，需代理>
 GEMINI_API_KEY: <Gemini gemini-flash-latest，需代理>
+# 本机代理监听地址（看你自己代理软件的端口设置，不要照抄 7890！）
+#   Clash/Clash Verge → http://127.0.0.1:7890
+#   v2rayN           → http://127.0.0.1:10809
+#   Shadowsocks      → http://127.0.0.1:1080
 VISION_PROXY: http://127.0.0.1:7890   # 仅 Groq/Gemini 需要（国内网络）
 
 # 可选：自定义视觉后端——填了就走自定义优先、内置兜底
@@ -66,7 +70,7 @@ VB_API_KEY: sk-xxx
 | GLM | [bigmodel.cn/usercenter/proj-mgmt/apikeys](https://bigmodel.cn/usercenter/proj-mgmt/apikeys) | 智谱 API Keys 页，注册即送免费额度（GLM-4.6V-Flash 免费） |
 | Groq | [console.groq.com/keys](https://console.groq.com/keys) | 免费注册，需代理访问 |
 | Gemini | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | Google AI Studio 的 API key 页，免费（3 分钟），需代理访问 |
-| VISION_PROXY | 自备 | 国内网络访问 Groq/Gemini 用的代理地址（如 Clash 的 `http://127.0.0.1:7890`） |
+| VISION_PROXY | 自备（本机代理） | 填**你自己代理软件的监听地址**：Clash → `127.0.0.1:7890`；v2rayN → `127.0.0.1:10809`；Shadowsocks → `127.0.0.1:1080`。以代理软件设置页显示的实际端口为准 |
 | 自定义端点 | 你自己的服务控制台 | 如阿里云百炼、OpenRouter、自建 vLLM/Ollama 的 API key |
 
 > 最少只需 `MIMO_API_KEY` 一个 key 即可使用（其余为兜底冗余）。
